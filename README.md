@@ -1,6 +1,12 @@
 # Interchain Tokens SDK
 
-A TypeScript SDK for managing interchain tokens across different blockchain networks.
+A TypeScript SDK for managing interchain tokens across different blockchain networks. Currently supports testnet environments for Base, Optimism, and Ethereum networks.
+
+## Supported Networks
+
+- Base Sepolia (Testnet)
+- Optimism Sepolia (Testnet)
+- Ethereum Sepolia (Testnet)
 
 ## Installation
 
@@ -11,7 +17,7 @@ npm install interchain-tokens-sdk
 ## Usage
 
 ```typescript
-import { InterchainTokensSDK } from 'interchain-tokens-sdk';
+import { InterchainTokensSDK } from "interchain-tokens-sdk";
 
 // Initialize the SDK
 const sdk = new InterchainTokensSDK({
@@ -21,9 +27,10 @@ const sdk = new InterchainTokensSDK({
 
 ## Features
 
-- Cross-chain token management
+- Cross-chain token management between Base, Optimism, and Ethereum testnets
 - Built with TypeScript
 - Uses viem for Ethereum interactions
+- Network validation for supported testnets
 
 ## Development
 
