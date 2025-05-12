@@ -23,6 +23,7 @@ build/
 
 # Test coverage
 coverage/
+deployed_logs.txt
 
 # Logs
 logs/
