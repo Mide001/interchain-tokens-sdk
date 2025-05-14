@@ -1,4 +1,4 @@
-import { Chain } from 'viem';
+import { baseSepolia, optimismSepolia, arbitrumSepolia } from 'viem/chains';
 
 export interface ChainConfig {
   name: string;
@@ -35,6 +35,8 @@ export const SUPPORTED_CHAINS: Record<string, ChainConfig> = {
     gasBuffer: BigInt(100000),
   },
 };
+
+export const supportedChains = [baseSepolia, optimismSepolia, arbitrumSepolia] as const;
 
 export function getChainConfig(chainName: string): ChainConfig {
   const config = SUPPORTED_CHAINS[chainName.toLowerCase()];
