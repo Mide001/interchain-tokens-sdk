@@ -6,7 +6,7 @@ A TypeScript SDK for managing interchain tokens across different blockchain netw
 
 - Base Sepolia (Testnet)
 - Optimism Sepolia (Testnet)
-- Ethereum Sepolia (Testnet)
+- Polygon Sepolia (Testnet)
 
 ## Installation
 
@@ -73,6 +73,7 @@ interface DeployResult {
 - Network validation for supported testnets
 - Deterministic token deployment using salt
 - Event parsing for deployment confirmation
+- Multicall support for deploying tokens across multiple chains in a single transaction
 
 ## Development
 
