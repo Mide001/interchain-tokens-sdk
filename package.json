@@ -2,12 +2,18 @@
   "name": "interchain-tokens-sdk",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "test": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "prepare": "npm run build"
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "test": "jest",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "check-types": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +26,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.17",
+    "rimraf": "^6.0.1",
     "typescript": "^5.8.3"
   }
 }
