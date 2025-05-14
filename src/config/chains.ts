@@ -26,10 +26,10 @@ export const SUPPORTED_CHAINS: Record<string, ChainConfig> = {
     baseGasEstimate: BigInt(500000),
     gasBuffer: BigInt(100000),
   },
-  'polygon-sepolia': {
-    name: 'Polygon Sepolia',
-    chainId: BigInt(80001),
-    rpcUrl: 'https://rpc-mumbai.maticvigil.com',
+  'arbitrum-sepolia': {
+    name: 'Arbitrum Sepolia',
+    chainId: BigInt(421614),
+    rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
     contractAddress: '0x83a93500d23Fbc3e82B410aD07A6a9F7A0670D66',
     baseGasEstimate: BigInt(500000),
     gasBuffer: BigInt(100000),

@@ -225,15 +225,26 @@ export async function deployInterchainTokenMulticall(
   tokenDeployed?: TokenDeployed;
 }> {
   const chainId = BigInt(await publicClient.getChainId());
+  const currentChain = Object.entries(SUPPORTED_CHAINS).find(
+    ([_, config]) => config.chainId === chainId
+  );
 
-  const baseSepoliaConfig = SUPPORTED_CHAINS["base-sepolia"];
-
-  if (chainId !== baseSepoliaConfig.chainId) {
+  if (!currentChain) {
     throw new Error(
-      `This function is only supported on ${baseSepoliaConfig.name} (chain ID: ${baseSepoliaConfig.chainId})`
+      `Current chain (${chainId}) is not supported. Supported chains: ${Object.entries(
+        SUPPORTED_CHAINS
+      )
+        .map(([name, config]) => `${name} (chain ID: ${config.chainId})`)
+        .join(", ")}`
     );
   }
 
+  // Filter out the current chain from destination chains if it's included
+  destinationChains = destinationChains.filter(
+    (chain) => chain.toLowerCase() !== currentChain[0].toLowerCase()
+  );
+
+  // Validate all destination chains
   destinationChains.forEach(validateChain);
 
   const salt = generateRandomSalt();
