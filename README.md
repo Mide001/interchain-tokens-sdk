@@ -1,12 +1,12 @@
 # Interchain Tokens SDK
 
-A TypeScript SDK for managing interchain tokens across different blockchain networks. Currently supports testnet environments for Base, Optimism, and Ethereum networks.
+A TypeScript SDK for deploying new tokens across multiple chains using the Axelar network. This SDK allows you to deploy a new token on one chain and automatically deploy its corresponding versions on other supported chains.
 
-## Supported Networks
+## Currently Supported Networks (Testnet Only)
 
-- Base Sepolia (Testnet)
-- Optimism Sepolia (Testnet)
-- Polygon Sepolia (Testnet)
+- Base Sepolia
+- Optimism Sepolia
+- Arbitrum Sepolia
 
 ## Installation
 
@@ -17,76 +17,92 @@ npm install interchain-tokens-sdk
 ## Usage
 
 ```typescript
-import { InterchainTokensSDK } from "interchain-tokens-sdk";
+import { deployInterchainTokenMulticall, SUPPORTED_CHAINS } from "interchain-tokens-sdk";
 import { createWalletClient, createPublicClient, http } from "viem";
 import { baseSepolia } from "viem/chains";
 
-// Initialize the SDK
-const sdk = new InterchainTokensSDK({
-  // configuration options
-});
-
-// Create wallet and public clients
+// Create wallet and public clients for your source chain (e.g., Base Sepolia)
 const walletClient = createWalletClient({
-  account: yourAccount,
+  account,
   chain: baseSepolia,
-  transport: http(RPC_URL),
+  transport: http(RPC_URL)
 });
 
 const publicClient = createPublicClient({
   chain: baseSepolia,
-  transport: http(RPC_URL),
+  transport: http(RPC_URL)
 });
 
-// Deploy an interchain token across multiple chains using multicall
-const result = await sdk.deployInterchainTokenMulticall({
-  name: "My Token",
-  symbol: "MTK",
-  decimals: 18,
-  initialSupply: 1000000,
-  minter: "0x0000000000000000000000000000000000000000", // Address that can mint new tokens
-  destinationChains: ["optimism-sepolia", "ethereum-sepolia"], // Chains to deploy to
+// Deploy your token across chains
+const result = await deployInterchainTokenMulticall(
+  tokenName,            // string: your token name
+  tokenSymbol,          // string: your token symbol
+  decimals,            // number: number of decimals (e.g., 18)
+  initialSupply,       // number: initial token supply
+  minterAddress,       // string: address that can mint tokens
+  destinationChains,   // string[]: array of supported chain names
   walletClient,
-  publicClient,
-});
+  publicClient
+);
 
-// Result structure
-interface DeployResult {
-  hash: `0x${string}`; // Transaction hash
+// The deployment result will have this structure:
+interface DeploymentResult {
+  hash: `0x${string}`;              // transaction hash
   tokenDeployed?: {
-    tokenId: `0x${string}`; // Unique identifier for the token
-    tokenAddress: `0x${string}`; // Address of the deployed token contract
-    minter: `0x${string}`; // Address that can mint new tokens
-    name: string; // Token name
-    symbol: string; // Token symbol
-    decimals: number; // Token decimals
-    salt: `0x${string}`; // Salt used for deployment
+    tokenId: `0x${string}`;         // unique identifier across chains
+    tokenAddress: `0x${string}`;    // token contract address
+    minter: `0x${string}`;          // minter address
+    name: string;                   // token name
+    symbol: string;                 // token symbol
+    decimals: number;               // token decimals
+    salt: `0x${string}`;           // deployment salt
   };
 }
 ```
 
-## Features
+## Important Notes
 
-- Cross-chain token management between Base, Optimism, and Ethereum testnets
-- Built with TypeScript
-- Uses viem for Ethereum interactions
-- Network validation for supported testnets
-- Deterministic token deployment using salt
-- Event parsing for deployment confirmation
-- Multicall support for deploying tokens across multiple chains in a single transaction
+1. **New Tokens Only**: This version of the SDK only supports deploying new tokens. Support for existing tokens will be added in future updates.
+
+2. **Source Chain**: You can deploy from any of the supported chains, but make sure your wallet has enough native tokens for:
+   - The deployment transaction
+   - Gas fees for cross-chain messaging
+
+3. **Destination Chains**: When specifying destination chains, use the chain identifiers exactly as follows:
+   - "base-sepolia"
+   - "optimism-sepolia"
+   - "arbitrum-sepolia"
+
+4. **Return Values**:
+   - `hash`: The transaction hash of the deployment
+   - `tokenDeployed`: Object containing the deployed token details
+     - `tokenId`: Unique identifier for your token across all chains
+     - `tokenAddress`: The token's contract address on the source chain
+     - `minter`: Address with minting privileges
+     - `name`: Token name as provided during deployment
+     - `symbol`: Token symbol as provided during deployment
+     - `decimals`: Token decimals as provided during deployment
+     - `salt`: Unique salt used for deployment
+
+5. **Axelar Network**: This SDK uses Axelar's infrastructure for cross-chain communication. The deployment process:
+   - Deploys the token on the source chain
+   - Creates token managers on destination chains
+   - Sets up the cross-chain token mapping
 
 ## Development
+
+To contribute or modify the SDK:
 
 1. Clone the repository
 2. Install dependencies:
    ```bash
    npm install
    ```
-3. Build the project:
+3. Build:
    ```bash
    npm run build
    ```
-4. Run tests:
+4. Test:
    ```bash
    npm test
    ```
