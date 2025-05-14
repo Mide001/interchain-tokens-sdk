@@ -3,6 +3,8 @@ export {
   deployInterchainTokenCall,
   deployRemoteInterchainToken,
   deployRemoteInterchainTokenCall,
+  deployInterchainTokenMulticall,
   getInterchainTokenDeployedFromLogs,
-  type InterchainTokenDeployedEventArgs,
 } from "./actions/interchainTokenFactory";
+
+export { type InterchainTokenDeployedEventArgs } from "./types/types";

@@ -38,13 +38,14 @@ const publicClient = createPublicClient({
   transport: http(RPC_URL),
 });
 
-// Deploy an interchain token
-const result = await sdk.deployInterchainToken({
+// Deploy an interchain token across multiple chains using multicall
+const result = await sdk.deployInterchainTokenMulticall({
   name: "My Token",
   symbol: "MTK",
   decimals: 18,
   initialSupply: 1000000,
-  minter: "0x...", // Address that can mint new tokens
+  minter: "0x0000000000000000000000000000000000000000", // Address that can mint new tokens
+  destinationChains: ["optimism-sepolia", "ethereum-sepolia"], // Chains to deploy to
   walletClient,
   publicClient,
 });

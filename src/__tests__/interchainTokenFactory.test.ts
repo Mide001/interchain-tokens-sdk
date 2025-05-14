@@ -4,6 +4,7 @@ import {
   deployInterchainTokenCall,
   deployRemoteInterchainToken,
   deployRemoteInterchainTokenCall,
+  deployInterchainTokenMulticall,
   getInterchainTokenDeployedFromLogs,
 } from "../actions/interchainTokenFactory";
 import { INTERCHAIN_PROXY_CONTRACT_ADDRESS } from "../constants/constants";
@@ -263,6 +264,59 @@ describe("InterchainTokenFactory", () => {
         tokenDeployed: undefined,
       });
       expect(validateClientNetwork).toHaveBeenCalled();
+    });
+  });
+
+  describe("deployInterchainTokenMulticall", () => {
+    it("should deploy an interchain token on multiple chains using multicall", async () => {
+      const mockHash =
+        "0x1234567890123456789012345678901234567890123456789012345678901234";
+      const mockReceipt: TransactionReceipt = {
+        logs: [],
+        blockHash:
+          "0x1234567890123456789012345678901234567890123456789012345678901234",
+        blockNumber: BigInt(1),
+        contractAddress: null,
+        cumulativeGasUsed: BigInt(1),
+        effectiveGasPrice: BigInt(1),
+        from: "0x1234567890123456789012345678901234567890",
+        gasUsed: BigInt(1),
+        logsBloom: `0x${"0".repeat(512)}` as `0x${string}`,
+        status: "success",
+        to: "0x1234567890123456789012345678901234567890",
+        transactionHash: mockHash,
+        transactionIndex: 0,
+        type: "0x0",
+      };
+
+      mockPublicClient.simulateContract.mockResolvedValue({ request: {} });
+      mockWalletClient.writeContract.mockResolvedValue(mockHash);
+      mockPublicClient.waitForTransactionReceipt.mockResolvedValue(mockReceipt);
+      mockPublicClient.estimateContractGas.mockResolvedValue(BigInt(100000));
+
+      const destinationChains = ["ethereum", "polygon", "arbitrum"];
+
+      const result = await deployInterchainTokenMulticall(
+        mockName,
+        mockSymbol,
+        mockDecimals,
+        mockInitialSupply,
+        mockMinter,
+        destinationChains,
+        mockWalletClient as any,
+        mockPublicClient as any
+      );
+
+      expect(result).toEqual({
+        hash: mockHash,
+        tokenDeployed: undefined,
+      });
+      expect(validateClientNetwork).toHaveBeenCalled();
+      expect(mockPublicClient.simulateContract).toHaveBeenCalledWith(
+        expect.objectContaining({
+          functionName: "multicall",
+        })
+      );
     });
   });
 });
