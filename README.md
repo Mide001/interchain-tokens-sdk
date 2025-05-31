@@ -71,7 +71,7 @@ interface DeploymentResult {
 3. **Destination Chains**: When specifying destination chains, use the chain identifiers exactly as follows:
    - "base-sepolia"
    - "optimism-sepolia"
-   - "arbitrum-sepolia"
+   - "ethereum-sepolia"
 
 4. **Return Values**:
    - `hash`: The transaction hash of the deployment

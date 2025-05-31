@@ -1,0 +1,35 @@
+# Source
+src/
+tests/
+__tests__/
+
+# Config files
+.eslintrc.json
+.prettierrc
+.editorconfig
+tsconfig.json
+jest.config.js
+.github/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.*
+
+# Build process
+coverage/
+.nyc_output/ 

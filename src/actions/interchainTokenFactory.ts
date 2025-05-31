@@ -5,24 +5,17 @@ import {
   TransactionReceipt,
   parseEventLogs,
   encodeFunctionData,
-} from "viem";
+} from 'viem';
 import {
   INTERCHAIN_PROXY_CONTRACT_ABI,
   INTERCHAIN_PROXY_CONTRACT_ADDRESS,
-} from "../constants/constants";
-import { GenericPublicClient } from "../utils/genericPublicClient";
-import { validateClientNetwork } from "../utils/validateClientNetwork";
-import { generateRandomSalt } from "../utils/salt";
-import { AxelarQueryAPI, Environment } from "@axelar-network/axelarjs-sdk";
-import {
-  SUPPORTED_CHAINS,
-  getChainConfig,
-  validateChain,
-} from "../config/chains";
-import {
-  InterchainTokenDeployedEventArgs,
-  TokenDeployed,
-} from "../types/types";
+} from '../constants/constants.js';
+import { GenericPublicClient } from '../utils/genericPublicClient.js';
+import { validateClientNetwork } from '../utils/validateClientNetwork.js';
+import { generateRandomSalt } from '../utils/salt.js';
+import { AxelarQueryAPI, Environment } from '@axelar-network/axelarjs-sdk';
+import { SUPPORTED_CHAINS, getChainConfig, validateChain, ChainConfig } from '../config/chains.js';
+import { InterchainTokenDeployedEventArgs, TokenDeployed } from '../types/types.js';
 
 const sdk = new AxelarQueryAPI({
   environment: Environment.TESTNET,
@@ -39,7 +32,7 @@ export function deployInterchainTokenCall(
   return {
     address: INTERCHAIN_PROXY_CONTRACT_ADDRESS,
     abi: INTERCHAIN_PROXY_CONTRACT_ABI,
-    functionName: "deployInterchainToken",
+    functionName: 'deployInterchainToken',
     args: [salt, name, symbol, decimals, initialSupply, minter],
   } as const;
 }
@@ -52,14 +45,8 @@ export function deployRemoteInterchainTokenCall(
   return {
     address: INTERCHAIN_PROXY_CONTRACT_ADDRESS,
     abi: INTERCHAIN_PROXY_CONTRACT_ABI,
-    functionName: "deployRemoteInterchainToken",
-    args: [
-      "",
-      salt,
-      "0x0000000000000000000000000000000000000000",
-      destinationChain,
-      gasValue,
-    ],
+    functionName: 'deployRemoteInterchainToken',
+    args: ['', salt, '0x0000000000000000000000000000000000000000', destinationChain, gasValue],
   } as const;
 }
 
@@ -72,9 +59,7 @@ export function getInterchainTokenDeployedFromLogs(
     logs: receipt.logs,
   });
 
-  const event = eventLogs.find(
-    (log) => log.eventName === "InterchainTokenDeployed"
-  );
+  const event = eventLogs.find((log) => log.eventName === 'InterchainTokenDeployed');
 
   if (!event) {
     return undefined;
@@ -105,6 +90,7 @@ export function getInterchainTokenDeployedFromLogs(
 }
 
 export async function estimateRemoteDeploymentGas(
+  sourceChainName: string,
   destinationChain: string,
   executeData: `0x${string}`
 ): Promise<bigint> {
@@ -115,17 +101,17 @@ export async function estimateRemoteDeploymentGas(
     const baseGasEstimate = chainConfig.baseGasEstimate;
 
     const gasFee = await sdk.estimateGasFee(
-      "base-sepolia",
+      sourceChainName,
       destinationChain,
       baseGasEstimate.toString(),
       1.2,
-      "ETH",
+      'ETH',
       undefined,
       executeData,
       undefined
     );
 
-    if (typeof gasFee === "string") {
+    if (typeof gasFee === 'string') {
       return BigInt(gasFee);
     }
 
@@ -134,7 +120,6 @@ export async function estimateRemoteDeploymentGas(
     return estimatedGas;
   } catch (error) {
     console.error(`Error estimating gas for ${destinationChain}:`, error);
-
     return BigInt(600000);
   }
 }
@@ -154,14 +139,7 @@ export async function deployInterchainToken(
   validateClientNetwork(publicClient);
   const salt = generateRandomSalt();
 
-  const call = deployInterchainTokenCall(
-    salt,
-    name,
-    symbol,
-    decimals,
-    initialSupply,
-    minter
-  );
+  const call = deployInterchainTokenCall(salt, name, symbol, decimals, initialSupply, minter);
 
   const { request } = await publicClient.simulateContract({
     ...call,
@@ -190,11 +168,7 @@ export async function deployRemoteInterchainToken(
 }> {
   validateClientNetwork(publicClient);
 
-  const call = deployRemoteInterchainTokenCall(
-    salt,
-    destinationChain,
-    gasValue
-  );
+  const call = deployRemoteInterchainTokenCall(salt, destinationChain, gasValue);
 
   const { request } = await publicClient.simulateContract({
     ...call,
@@ -225,8 +199,9 @@ export async function deployInterchainTokenMulticall(
   tokenDeployed?: TokenDeployed;
 }> {
   const chainId = BigInt(await publicClient.getChainId());
+
   const currentChain = Object.entries(SUPPORTED_CHAINS).find(
-    ([_, config]) => config.chainId === chainId
+    ([_, config]: [string, ChainConfig]) => config.chainId === chainId
   );
 
   if (!currentChain) {
@@ -234,14 +209,15 @@ export async function deployInterchainTokenMulticall(
       `Current chain (${chainId}) is not supported. Supported chains: ${Object.entries(
         SUPPORTED_CHAINS
       )
-        .map(([name, config]) => `${name} (chain ID: ${config.chainId})`)
-        .join(", ")}`
+        .map(([name, config]: [string, ChainConfig]) => `${name} (chain ID: ${config.chainId})`)
+        .join(', ')}`
     );
   }
+  const currentChainName = currentChain[0];
 
-  // Filter out the current chain from destination chains if it's included
+  // Filter out the current chain from destination chains
   destinationChains = destinationChains.filter(
-    (chain) => chain.toLowerCase() !== currentChain[0].toLowerCase()
+    (chain) => chain.toLowerCase() !== currentChainName.toLowerCase()
   );
 
   // Validate all destination chains
@@ -249,63 +225,54 @@ export async function deployInterchainTokenMulticall(
 
   const salt = generateRandomSalt();
 
-  const initialSupplyWithDecimals =
-    BigInt(initialSupply) * BigInt(10) ** BigInt(decimals);
+  const initialSupplyWithDecimals = BigInt(initialSupply) * BigInt(10) ** BigInt(decimals);
 
   const initialDeployCall = encodeFunctionData({
     abi: INTERCHAIN_PROXY_CONTRACT_ABI,
-    functionName: "deployInterchainToken",
+    functionName: 'deployInterchainToken',
     args: [salt, name, symbol, decimals, initialSupplyWithDecimals, minter],
   });
 
   const remoteDeployCalls = await Promise.all(
     destinationChains.map(async (chain) => {
+      console.log('Deploying to chain:', chain);
       const executeData = encodeFunctionData({
         abi: INTERCHAIN_PROXY_CONTRACT_ABI,
-        functionName: "deployRemoteInterchainToken",
-        args: [
-          "",
-          salt,
-          "0x0000000000000000000000000000000000000000",
-          chain,
-          BigInt(0),
-        ],
+        functionName: 'deployRemoteInterchainToken',
+        args: ['', salt, '0x0000000000000000000000000000000000000000', chain, BigInt(0)],
       });
 
-      const gasValue = await estimateRemoteDeploymentGas(chain, executeData);
+      const gasValue = await estimateRemoteDeploymentGas(currentChainName, chain, executeData);
 
       return encodeFunctionData({
         abi: INTERCHAIN_PROXY_CONTRACT_ABI,
-        functionName: "deployRemoteInterchainToken",
-        args: [
-          "",
-          salt,
-          "0x0000000000000000000000000000000000000000",
-          chain,
-          gasValue,
-        ],
+        functionName: 'deployRemoteInterchainToken',
+        args: ['', salt, '0x0000000000000000000000000000000000000000', chain, gasValue],
       });
     })
   );
 
   const multicallData = [initialDeployCall, ...remoteDeployCalls];
 
-  const { request } = await publicClient.simulateContract({
-    address: INTERCHAIN_PROXY_CONTRACT_ADDRESS,
-    abi: INTERCHAIN_PROXY_CONTRACT_ABI,
-    functionName: "multicall",
-    args: [multicallData],
-    account: walletClient.account,
-  });
+  try {
+    const { request } = await publicClient.simulateContract({
+      address: INTERCHAIN_PROXY_CONTRACT_ADDRESS,
+      abi: INTERCHAIN_PROXY_CONTRACT_ABI,
+      functionName: 'multicall',
+      args: [multicallData],
+      account: walletClient.account,
+    });
 
-  const hash = await walletClient.writeContract(request);
+    const hash = await walletClient.writeContract(request);
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    const tokenDeployed = getInterchainTokenDeployedFromLogs(receipt, salt);
 
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
-
-  const tokenDeployed = getInterchainTokenDeployedFromLogs(receipt, salt);
-
-  return {
-    hash,
-    tokenDeployed,
-  };
+    return {
+      hash,
+      tokenDeployed,
+    };
+  } catch (error) {
+    console.error('Error in multicall:', error);
+    throw error;
+  }
 }

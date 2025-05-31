@@ -1,23 +1,44 @@
 {
-  "name": "interchain-tokens-sdk",
-  "version": "1.0.0",
-  "description": "",
+  "name": "interchain-token-sdk",
+  "version": "1.0.3",
+  "description": "SDK for deploying and managing interchain tokens across multiple chains using Axelar network",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
-    "test": "jest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "npm run build",
-    "prepublishOnly": "npm test && npm run lint",
     "check-types": "tsc --noEmit"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "blockchain",
+    "interchain",
+    "tokens",
+    "axelar",
+    "cross-chain",
+    "ethereum",
+    "web3"
+  ],
+  "author": "Mide001",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mide001/interchain-tokens-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Mide001/interchain-tokens-sdk/issues"
+  },
+  "homepage": "https://github.com/Mide001/interchain-tokens-sdk#readme",
   "dependencies": {
     "@axelar-network/axelarjs-sdk": "^0.17.2",
     "dotenv": "^16.5.0",
@@ -26,7 +47,16 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.17",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "eslint": "^9.26.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.0",
+    "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

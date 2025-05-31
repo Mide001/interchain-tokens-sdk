@@ -11,7 +11,6 @@ import { privateKeyToAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains";
 import { deployInterchainTokenMulticall } from "../actions/interchainTokenFactory";
 import { GenericPublicClient } from "../utils/genericPublicClient";
-import { INTERCHAIN_PROXY_CONTRACT_ADDRESS } from "../constants/constants";
 require("dotenv").config();
 
 const PRIVATE_KEY = process.env.TEST_PRIVATE_KEY as `0x${string}`;
@@ -59,13 +58,12 @@ describe("InterchainTokenFactory Integration Tests", () => {
   });
 
   it("should deploy an interchain token on base-sepolia and optimism-sepolia using multicall", async () => {
-    const name = "Billionaire Son";
-    const symbol = "BNS";
+    const name = 'Billionaire Son';
+    const symbol = 'BNS';
     const decimals = 18;
     const initialSupply = 10000000; // 10 million tokens
-    const minter =
-      "0x0000000000000000000000000000000000000000" as `0x${string}`;
-    const destinationChains = ["polygon-sepolia"];
+    const minter = '0x0000000000000000000000000000000000000000' as `0x${string}`;
+    const destinationChains = ['optimism-sepolia'];
     const userAddress = (await walletClient.account?.address) as `0x${string}`;
 
     console.log("\nStarting test deployment...");
