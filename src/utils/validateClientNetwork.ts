@@ -1,5 +1,5 @@
 import { PublicClient } from "viem";
-import { baseSepolia, optimismSepolia, arbitrumSepolia } from "viem/chains";
+import { baseSepolia, optimismSepolia, sepolia } from "viem/chains";
 
 export const validateClientNetwork = (
   publicClient: PublicClient<any, any, any, any>
@@ -14,7 +14,7 @@ export const validateClientNetwork = (
     return;
   }
 
-  if (clientChainId === arbitrumSepolia.id) {
+  if (clientChainId === sepolia.id) {
     return;
   }
 
