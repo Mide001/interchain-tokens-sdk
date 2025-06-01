@@ -1,8 +1,8 @@
 import {
- // Address,
+  Address,
   WalletClient,
   SimulateContractParameters,
- // TransactionReceipt,
+  // TransactionReceipt,
 } from 'viem';
 import {
   INTERCHAIN_PROXY_CONTRACT_ABI,
@@ -10,11 +10,15 @@ import {
 } from '../constants/constants.js';
 import { GenericPublicClient } from '../utils/genericPublicClient.js';
 import { validateClientNetwork } from '../utils/validateClientNetwork.js';
+import { isERC20Token } from '../utils/validateERC20Address.js';
+import { getChainConfig } from '../config/chains.js';
 // import { AxelarQueryAPI, Environment } from '@axelar-network/axelarjs-sdk';
 
 // const sdk = new AxelarQueryAPI({ environment: Environment.TESTNET });
 
-export function registerCanonicalInterchainTokenCall(tokenAddress: string): SimulateContractParameters {
+export function registerCanonicalInterchainTokenCall(
+  tokenAddress: string
+): SimulateContractParameters {
   return {
     address: INTERCHAIN_PROXY_CONTRACT_ADDRESS,
     abi: INTERCHAIN_PROXY_CONTRACT_ABI,
@@ -23,22 +27,34 @@ export function registerCanonicalInterchainTokenCall(tokenAddress: string): Simu
   } as const;
 }
 
-export async function registerCanonicalInterchainToken(tokenAddress: `0x${string}`, walletClient: WalletClient, publicClient: GenericPublicClient): Promise<{
+export async function registerCanonicalInterchainToken(
+  tokenAddress: Address,
+  walletClient: WalletClient,
+  publicClient: GenericPublicClient
+): Promise<{
   hash: `0x${string}`;
 }> {
-    validateClientNetwork(publicClient);
+  validateClientNetwork(publicClient);
 
-    const call = registerCanonicalInterchainTokenCall(tokenAddress);
+  // Validate token address first
+  const isValid = await isERC20Token(tokenAddress, publicClient);
+  if (!isValid) {
+    const chainId = await publicClient.getChainId();
+    const chainConfig = getChainConfig(chainId.toString());
+    throw new Error(`${tokenAddress} not found on ${chainConfig.name}`);
+  }
 
-    const { request } = await publicClient.simulateContract({
-        ...call,
-        account: walletClient.account!,
-    });
+  const call = registerCanonicalInterchainTokenCall(tokenAddress);
 
-    const hash = await walletClient.writeContract(request);
-    await publicClient.waitForTransactionReceipt({ hash });
+  const { request } = await publicClient.simulateContract({
+    ...call,
+    account: walletClient.account!,
+  });
 
-    return {
-        hash,
-    };
+  const hash = await walletClient.writeContract(request);
+  await publicClient.waitForTransactionReceipt({ hash });
+
+  return {
+    hash,
+  };
 }
