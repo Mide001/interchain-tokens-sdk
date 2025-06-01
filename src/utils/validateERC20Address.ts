@@ -44,7 +44,7 @@ export async function isValidERC20Token(
   }
 }
 
-// returns boolean only
+// Internal use only - returns boolean
 export async function isERC20Token(
   tokenAddress: `0x${string}`,
   publicClient: GenericPublicClient
