@@ -119,7 +119,6 @@ export async function estimateRemoteDeploymentGas(
 
     return estimatedGas;
   } catch (error) {
-    console.error(`Error estimating gas for ${destinationChain}:`, error);
     return BigInt(600000);
   }
 }
@@ -235,7 +234,6 @@ export async function deployInterchainTokenMulticall(
 
   const remoteDeployCalls = await Promise.all(
     destinationChains.map(async (chain) => {
-      console.log('Deploying to chain:', chain);
       const executeData = encodeFunctionData({
         abi: INTERCHAIN_PROXY_CONTRACT_ABI,
         functionName: 'deployRemoteInterchainToken',
@@ -272,7 +270,6 @@ export async function deployInterchainTokenMulticall(
       tokenDeployed,
     };
   } catch (error) {
-    console.error('Error in multicall:', error);
     throw error;
   }
 }
